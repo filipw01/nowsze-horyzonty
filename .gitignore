@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+codedb.snapshot
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+data/*.draft.json
+data/*.discovered.json
+coverage/
+.DS_Store

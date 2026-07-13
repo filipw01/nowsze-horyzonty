@@ -1,0 +1,107 @@
+.nhx-grid-rating {
+  position: absolute;
+  right: 8px;
+  bottom: 7px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  max-width: calc(100% - 16px);
+  padding: 2px 4px;
+  overflow: hidden;
+  color: #111;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 3px;
+}
+
+.nhx-grid-metkas {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  z-index: 2;
+  max-width: calc(100% - 16px);
+  padding: 2px 4px;
+  overflow: hidden;
+  color: #111;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 3px;
+}
+
+.nhx-grid-score {
+  font-weight: 800;
+}
+
+.nhx-grid-votes {
+  color: #333;
+  font-weight: 400;
+}
+
+a.bs.nhx-grid-enhanced {
+  position: relative;
+}
+
+.ToolTipK .nhx-enhanced {
+  color: #ededed;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.ToolTipK .nhx-popover-ratings {
+  margin-top: 6px;
+  margin-bottom: 3px;
+  color: #d9d9d9;
+  font-weight: 400;
+}
+
+.ToolTipK .nhx-enhanced .nhx-score {
+  font-weight: 800 !important;
+}
+
+.ToolTipK .nhx-enhanced .nhx-tone-good,
+.nhx-grid-rating .nhx-tone-good {
+  color: #1f9d55 !important;
+}
+
+.ToolTipK .nhx-enhanced .nhx-tone-mixed,
+.nhx-grid-rating .nhx-tone-mixed {
+  color: #d28b00 !important;
+}
+
+.ToolTipK .nhx-enhanced .nhx-tone-poor,
+.nhx-grid-rating .nhx-tone-poor {
+  color: #d83b3b !important;
+}
+
+.ToolTipK .nhx-popover-genre {
+  display: block;
+  margin: 0;
+  color: #f1f1f1;
+}
+
+.ToolTipK .nhx-popover-links {
+  display: flex;
+  gap: 14px;
+  margin-top: 2px;
+  margin-bottom: 8px;
+}
+
+.ToolTipK .nhx-enhanced .nhx-popover-link {
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.ToolTipK .nhx-popover-summary {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  color: #e6e6e6;
+}

@@ -1,0 +1,29 @@
+{
+  "name": "nowsze-horyzonty",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @nowsze-horyzonty/shared && npm run build -w @nowsze-horyzonty/api && npm run build -w @nowsze-horyzonty/extension",
+    "check": "npm run build -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/api && npm run check -w @nowsze-horyzonty/extension && tsc -p tsconfig.scripts.json",
+    "test": "npm run test -w @nowsze-horyzonty/shared && npm run test -w @nowsze-horyzonty/api && npm run test -w @nowsze-horyzonty/extension --if-present",
+    "dead-code": "knip",
+    "dev:api": "npm run dev -w @nowsze-horyzonty/api",
+    "build:extension": "npm run build -w @nowsze-horyzonty/extension",
+    "nh:discover": "tsx scripts/discover-nh-films.ts",
+    "nh:draft": "tsx scripts/draft-film-metadata.ts",
+    "nh:generate-films": "tsx scripts/generate-films-json.ts"
+  },
+  "devDependencies": {
+    "@nowsze-horyzonty/shared": "^0.1.0",
+    "@types/node": "^24.0.15",
+    "cheerio": "^1.1.2",
+    "knip": "^5.61.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}
