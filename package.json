@@ -8,15 +8,17 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build -w @nowsze-horyzonty/shared && npm run build -w @nowsze-horyzonty/api && npm run build -w @nowsze-horyzonty/extension",
-    "check": "npm run build -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/api && npm run check -w @nowsze-horyzonty/extension && tsc -p tsconfig.scripts.json",
-    "test": "npm run test -w @nowsze-horyzonty/shared && npm run test -w @nowsze-horyzonty/api && npm run test -w @nowsze-horyzonty/extension --if-present",
+    "build": "npm run build -w @nowsze-horyzonty/shared && npm run build -w @nowsze-horyzonty/extension",
+    "check": "npm run build -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/shared && npm run check -w @nowsze-horyzonty/extension && tsc -p tsconfig.scripts.json",
+    "test": "npm run test -w @nowsze-horyzonty/shared && npm run test -w @nowsze-horyzonty/extension && npm run test:catalog",
+    "test:catalog": "tsx --test scripts/catalog/*.test.ts",
     "dead-code": "knip",
-    "dev:api": "npm run dev -w @nowsze-horyzonty/api",
     "build:extension": "npm run build -w @nowsze-horyzonty/extension",
     "nh:discover": "tsx scripts/discover-nh-films.ts",
     "nh:draft": "tsx scripts/draft-film-metadata.ts",
-    "nh:generate-films": "tsx scripts/generate-films-json.ts"
+    "nh:match-imdb": "tsx scripts/match-imdb.ts",
+    "nh:enrich-imdb": "tsx scripts/enrich-imdb.ts",
+    "nh:enrich-metacritic": "tsx scripts/enrich-metacritic.ts"
   },
   "devDependencies": {
     "@nowsze-horyzonty/shared": "^0.1.0",

@@ -1,11 +1,27 @@
-import { cpSync, mkdirSync, rmSync } from "node:fs";
+import { cpSync, mkdirSync, readFileSync, rmSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import esbuild from "esbuild";
+import { projectCatalog } from "./catalog.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
-const apiBaseUrl = process.env.NH_API_BASE_URL || "http://localhost:8787";
+const catalog = JSON.parse(readFileSync(resolve(root, "..", "..", "data", "films.json"), "utf8"));
+const embeddedFilmCatalog = projectCatalog(catalog);
+
+const embeddedFilmCatalogPlugin = {
+  name: "embedded-film-catalog",
+  setup(build) {
+    build.onResolve({ filter: /^virtual:film-catalog$/ }, (args) => ({
+      path: args.path,
+      namespace: "embedded-film-catalog"
+    }));
+    build.onLoad({ filter: /.*/, namespace: "embedded-film-catalog" }, () => ({
+      contents: `export const embeddedFilmCatalog = ${JSON.stringify(embeddedFilmCatalog)};`,
+      loader: "js"
+    }));
+  }
+};
 
 rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
@@ -18,12 +34,10 @@ await esbuild.build({
   target: "es2022",
   minify: false,
   sourcemap: true,
-  define: {
-    __NH_API_BASE_URL__: JSON.stringify(apiBaseUrl)
-  }
+  plugins: [embeddedFilmCatalogPlugin]
 });
 
 cpSync(resolve(root, "src/content.css"), resolve(dist, "content.css"));
 cpSync(resolve(root, "manifest.json"), resolve(dist, "manifest.json"));
 
-console.log(`Built extension with API base ${apiBaseUrl}`);
+console.log(`Built extension with ${embeddedFilmCatalog.length} catalog records`);

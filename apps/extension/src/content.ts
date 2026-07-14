@@ -4,56 +4,38 @@ import {
   formatScreeningTimeRange,
   imdbTone,
   normalizeNhKey,
-  type FilmBatchResponse,
   type FilmEnrichment,
   type NhFilmKey
 } from "@nowsze-horyzonty/shared";
+import { toEnrichmentMap, type EnrichmentMap } from "./film-catalog.js";
+import { embeddedFilmCatalog } from "virtual:film-catalog";
 
-const API_BASE_URL = __NH_API_BASE_URL__;
-const CACHE_KEY = "nhx-film-enrichment-cache-v1";
 const STARTUP_RETRIES = [0, 300, 900, 1800, 3200];
-const DEBUG = false;
 
-type EnrichmentMap = Partial<Record<NhFilmKey, FilmEnrichment>>;
 type ScreeningFacts = {
   title?: string;
   runtimeMinutes?: number;
   metkaCount?: string;
 };
 
-let enrichments: EnrichmentMap = {};
+const enrichments: EnrichmentMap = toEnrichmentMap(embeddedFilmCatalog);
 let screeningFactsById: Record<string, ScreeningFacts> | null = null;
 
 void boot();
 
-async function boot(): Promise<void> {
+function boot(): void {
   for (const delay of STARTUP_RETRIES) {
-    window.setTimeout(() => {
-      void runOnce();
-    }, delay);
+    window.setTimeout(runOnce, delay);
   }
 
   document.addEventListener("mouseover", (event) => schedulePopoverPatch(event.target), true);
   document.addEventListener("focusin", (event) => schedulePopoverPatch(event.target), true);
 }
 
-async function runOnce(): Promise<void> {
+function runOnce(): void {
   const anchors = findScreeningAnchors();
-  const keys = [...new Set(anchors.map((anchor) => getNhKey(anchor)).filter((key): key is NhFilmKey => key !== null))];
-  if (!keys.length) return;
-
-  const cached = await readCachedItems();
-  enrichments = { ...enrichments, ...pickKeys(cached, keys) };
+  if (!anchors.length) return;
   renderGridRatings(anchors);
-
-  try {
-    const response = await fetchBatch(keys);
-    enrichments = { ...enrichments, ...response.items };
-    await writeCachedItems(enrichments);
-    renderGridRatings(anchors);
-  } catch (error) {
-    debug("Batch fetch failed", error);
-  }
 }
 
 function findScreeningAnchors(): HTMLAnchorElement[] {
@@ -63,20 +45,6 @@ function findScreeningAnchors(): HTMLAnchorElement[] {
 function getNhKey(anchor: HTMLAnchorElement): NhFilmKey | null {
   const href = anchor.getAttribute("href");
   return href ? normalizeNhKey(href) : null;
-}
-
-async function fetchBatch(keys: NhFilmKey[]): Promise<FilmBatchResponse> {
-  const response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/api/extension/films`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ keys, debug: DEBUG })
-  });
-
-  if (!response.ok) {
-    throw new Error(`API returned ${response.status}`);
-  }
-
-  return (await response.json()) as FilmBatchResponse;
 }
 
 function renderGridRatings(anchors: HTMLAnchorElement[]): void {
@@ -145,7 +113,8 @@ function createGridRatingNodes(item: FilmEnrichment | undefined): Node[] {
 
 function renderMetkaCount(anchor: HTMLAnchorElement, popover?: HTMLElement): void {
   const count = getMetkaCount(anchor, popover);
-  const existing = anchor.querySelector<HTMLElement>(".nhx-grid-metkas");
+  const target = findMetkaContainer(anchor);
+  const existing = findMetkaBadge(anchor);
 
   if (!count) {
     existing?.remove();
@@ -154,13 +123,25 @@ function renderMetkaCount(anchor: HTMLAnchorElement, popover?: HTMLElement): voi
 
   const badge = existing ?? document.createElement("span");
   anchor.classList.add("nhx-grid-enhanced");
+  target.classList.add("nhx-metka-enhanced");
+  target.parentElement?.classList.add("nhx-metka-container");
   badge.className = "nhx-grid-metkas";
   badge.textContent = count;
   badge.title = "Liczba metek";
 
-  if (!existing) {
-    anchor.append(badge);
+  if (badge.parentElement !== target) {
+    badge.remove();
+    target.append(badge);
   }
+}
+
+function findMetkaContainer(anchor: HTMLAnchorElement): HTMLElement {
+  const next = anchor.nextElementSibling;
+  return next instanceof HTMLElement && next.matches("a.metka") ? next : anchor;
+}
+
+function findMetkaBadge(anchor: HTMLAnchorElement): HTMLElement | null {
+  return findMetkaContainer(anchor).querySelector<HTMLElement>(".nhx-grid-metkas") ?? anchor.querySelector<HTMLElement>(".nhx-grid-metkas");
 }
 
 function schedulePopoverPatch(target: EventTarget | null): void {
@@ -186,7 +167,10 @@ function patchVisiblePopovers(anchor: HTMLAnchorElement): void {
     renderTimeRange(anchor, popover);
     renderMetkaCount(anchor, popover);
     renderPopoverTimeRange(popover, anchor);
-    if (!item || popover.querySelector(".nhx-enhanced")) continue;
+    if (!item) continue;
+
+    removeOriginalTitleFromPopover(popover, item);
+    if (popover.querySelector(".nhx-enhanced")) continue;
 
     insertEnhancedPopoverContent(popover, item);
   }
@@ -209,19 +193,31 @@ function renderPopoverTimeRange(popover: HTMLElement, anchor: HTMLAnchorElement)
 }
 
 function insertEnhancedPopoverContent(popover: HTMLElement, item: FilmEnrichment): void {
+  const title = findTitleNode(popover);
+  const originalTitle = createOriginalTitleLine(item, title);
   const ratings = createRatingsLine(item);
   const links = createLinksLine(item);
   const summary = createSummaryLine(item);
-  const title = findTitleNode(popover);
-  const headlineNodes = [ratings, links].filter((node): node is HTMLElement => node !== null);
+  const headlineNodes = [originalTitle, ratings, links].filter((node): node is HTMLElement => node !== null);
 
   insertAfter(title, headlineNodes);
+  removeOriginalTitleFromPopover(popover, item);
   insertGenreIntoFilmDetails(popover, item);
 
   const summaryAnchor = popover.querySelector<HTMLElement>(".cy") || title;
   if (summary) {
     insertAfter(summaryAnchor, [summary]);
   }
+}
+
+function createOriginalTitleLine(item: FilmEnrichment, title: HTMLElement | null): HTMLElement | null {
+  const originalTitle = item.originalTitle?.trim();
+  if (!originalTitle || normalizeTitle(originalTitle) === normalizeTitle(title?.textContent)) return null;
+
+  const line = document.createElement("div");
+  line.className = "nhx-enhanced nhx-popover-original-title";
+  line.textContent = originalTitle;
+  return line;
 }
 
 function createGenreLine(item: FilmEnrichment): HTMLSpanElement | null {
@@ -245,6 +241,44 @@ function insertGenreIntoFilmDetails(popover: HTMLElement, item: FilmEnrichment):
   }
 
   details.append(document.createElement("br"), genre);
+}
+
+function removeOriginalTitleFromPopover(popover: HTMLElement, item: FilmEnrichment): void {
+  removeOriginalTitleFromTorg(popover, item);
+  removeOriginalTitleFromFilmDetails(popover, item);
+}
+
+function removeOriginalTitleFromTorg(popover: HTMLElement, item: FilmEnrichment): void {
+  const originalTitle = item.originalTitle?.trim();
+  if (!originalTitle) return;
+
+  for (const node of popover.querySelectorAll<HTMLElement>(".torg")) {
+    node.remove();
+  }
+}
+
+function removeOriginalTitleFromFilmDetails(popover: HTMLElement, item: FilmEnrichment): void {
+  const originalTitle = item.originalTitle?.trim();
+  const details = popover.querySelector<HTMLElement>(".danefil");
+  if (!originalTitle || !details) return;
+
+  const leadingNodes = nodesBeforeFirstBreak(details);
+  const leadingText = leadingNodes.map((node) => node.textContent || "").join("");
+  if (normalizeTitle(leadingText) !== normalizeTitle(originalTitle)) return;
+
+  for (const node of leadingNodes) node.remove();
+  while (details.firstChild && (details.firstChild.nodeName === "BR" || !details.firstChild.textContent?.trim())) {
+    details.firstChild.remove();
+  }
+}
+
+function nodesBeforeFirstBreak(element: HTMLElement): ChildNode[] {
+  const nodes: ChildNode[] = [];
+  for (const node of element.childNodes) {
+    if (node.nodeName === "BR") break;
+    nodes.push(node);
+  }
+  return nodes;
 }
 
 function createSummaryLine(item: FilmEnrichment): HTMLElement | null {
@@ -460,65 +494,4 @@ function normalizeCount(value: string | null | undefined): string | null {
 
 function normalizeTitle(value: string | null | undefined): string {
   return value?.replace(/\s+/g, " ").trim().toLowerCase() || "";
-}
-
-async function readCachedItems(): Promise<EnrichmentMap> {
-  const storage = extensionStorage();
-  if (!storage) return {};
-
-  const result = await new Promise<Record<string, unknown>>((resolve) => {
-    try {
-      storage.get(CACHE_KEY, (items) => {
-        if (window.chrome?.runtime?.lastError) {
-          debug("Cache read failed", window.chrome.runtime.lastError.message);
-          resolve({});
-          return;
-        }
-        resolve(items);
-      });
-    } catch (error) {
-      debug("Cache read failed", error);
-      resolve({});
-    }
-  });
-  const cached = result[CACHE_KEY];
-  return isRecord(cached) ? (cached as EnrichmentMap) : {};
-}
-
-async function writeCachedItems(items: EnrichmentMap): Promise<void> {
-  const storage = extensionStorage();
-  if (!storage) return;
-  await new Promise<void>((resolve) => {
-    try {
-      storage.set({ [CACHE_KEY]: items }, () => {
-        if (window.chrome?.runtime?.lastError) {
-          debug("Cache write failed", window.chrome.runtime.lastError.message);
-        }
-        resolve();
-      });
-    } catch (error) {
-      debug("Cache write failed", error);
-      resolve();
-    }
-  });
-}
-
-function extensionStorage() {
-  return window.chrome?.storage?.local;
-}
-
-function pickKeys(items: EnrichmentMap, keys: NhFilmKey[]): EnrichmentMap {
-  const picked: EnrichmentMap = {};
-  for (const key of keys) {
-    if (items[key]) picked[key] = items[key];
-  }
-  return picked;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-function debug(...args: unknown[]): void {
-  if (DEBUG) console.debug("[nowsze-horyzonty]", ...args);
 }

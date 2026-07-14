@@ -4,9 +4,6 @@
     ".": {
       "project": ["scripts/**/*.ts"]
     },
-    "apps/api": {
-      "project": ["src/**/*.ts"]
-    },
     "apps/extension": {
       "entry": ["src/content.ts"],
       "project": ["src/**/*.ts", "scripts/**/*.mjs"]
