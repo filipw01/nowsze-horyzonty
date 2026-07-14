@@ -8,6 +8,7 @@ interface PendingMatch {
   draft: DraftFilm;
   film: MatchFilm;
   saved?: ImdbCandidate;
+  hasImdbOverride: boolean;
   suggestions: ImdbCandidate[];
   errors: string[];
 }
@@ -23,6 +24,11 @@ interface MatchReportEntry {
 }
 
 const rematch = process.argv.includes("--rematch");
+const IMDB_OVERRIDES: Readonly<Partial<Record<MatchFilm["nhKey"], string>>> = {
+  "/program/26/powiedz-mi-co-czujesz": "tt39602504",
+  "/program/26/natura": "tt24852746",
+  "/program/26/lionel": "tt31863115"
+};
 const [drafts, catalog] = await Promise.all([readDrafts(), readCatalog()]);
 const existingByKey = catalogByKey(catalog);
 const pending: PendingMatch[] = [];
@@ -40,10 +46,16 @@ for (const draft of drafts) {
   }
 
   const existing = existingByKey.get(draft.nhKey);
+  const override = IMDB_OVERRIDES[film.nhKey];
   pending.push({
     draft,
     film,
-    ...(existing?.imdbId && !rematch ? { saved: savedImdbCandidate(existing.imdbId, film) } : {}),
+    ...(override
+      ? { saved: savedImdbCandidate(override, film, "manual override") }
+      : existing?.imdbId && !rematch
+        ? { saved: savedImdbCandidate(existing.imdbId, film) }
+        : {}),
+    hasImdbOverride: Boolean(override),
     suggestions: [],
     errors: []
   });
@@ -51,7 +63,7 @@ for (const draft of drafts) {
 
 const savedIds = new Set(pending.flatMap((entry) => (entry.saved ? [entry.saved.id] : [])));
 const savedFacts = await readFacts(savedIds, pending, "saved IMDb ID validation");
-const unresolved = pending.filter((entry) => selectImdbMatch(entry.film, entry.saved, [], savedFacts, rematch).shouldQuerySuggestions);
+const unresolved = pending.filter((entry) => selectImdbMatch(entry.film, entry.saved, [], savedFacts, entry.hasImdbOverride ? false : rematch).shouldQuerySuggestions);
 
 for (const [index, entry] of unresolved.entries()) {
   console.log(`[${index + 1}/${unresolved.length}] Matching ${entry.film.nhKey}`);
@@ -71,7 +83,13 @@ const generated = [];
 
 for (const entry of pending) {
   const candidates = mergeImdbCandidates([...(entry.saved ? [entry.saved] : []), ...entry.suggestions]);
-  const result = selectImdbMatch(entry.film, entry.saved, candidates.filter((candidate) => !candidate.sources.includes("saved")), facts, rematch);
+  const result = selectImdbMatch(
+    entry.film,
+    entry.saved,
+    candidates.filter((candidate) => !candidate.sources.includes("saved")),
+    facts,
+    entry.hasImdbOverride ? false : rematch
+  );
   if (!result.selected) {
     report.push({
       nhKey: entry.film.nhKey,

@@ -9,11 +9,11 @@ interface MatchSelection {
   shouldQuerySuggestions: boolean;
 }
 
-export function savedImdbCandidate(id: string, film: MatchFilm): ImdbCandidate {
+export function savedImdbCandidate(id: string, film: MatchFilm, query = "saved catalog id"): ImdbCandidate {
   return {
     id,
     title: film.originalTitle || film.festivalTitle,
-    query: "saved catalog id",
+    query,
     sources: ["saved"],
     score: 0,
     validation: []
