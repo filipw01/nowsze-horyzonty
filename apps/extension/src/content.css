@@ -20,20 +20,23 @@
 
 .nhx-grid-metkas {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 20px;
+  right: auto;
+  left: 50%;
   z-index: 2;
-  max-width: calc(100% - 16px);
-  padding: 2px 4px;
+  min-width: 18px;
+  max-width: 30px;
+  padding: 1px 2px;
   overflow: hidden;
   color: #111;
   font-size: 11px;
   font-weight: 600;
   line-height: 1;
+  text-align: center;
   white-space: nowrap;
   text-overflow: ellipsis;
-  background: rgba(255, 255, 255, 0.78);
-  border-radius: 3px;
+  background: transparent;
+  transform: translateX(-50%);
 }
 
 .nhx-grid-score {
@@ -49,6 +52,16 @@ a.bs.nhx-grid-enhanced {
   position: relative;
 }
 
+.nhx-metka-container,
+.nhx-metka-enhanced {
+  overflow: visible !important;
+}
+
+a.metka.nhx-metka-enhanced {
+  position: relative;
+  display: inline-block;
+}
+
 .ToolTipK .nhx-enhanced {
   color: #ededed;
   font-size: 15px;
@@ -59,6 +72,13 @@ a.bs.nhx-grid-enhanced {
   margin-top: 6px;
   margin-bottom: 3px;
   color: #d9d9d9;
+  font-weight: 400;
+}
+
+.ToolTipK .nhx-popover-original-title {
+  margin-top: 4px;
+  margin-bottom: 2px;
+  color: #dcdcdc;
   font-weight: 400;
 }
 

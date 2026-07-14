@@ -3,8 +3,6 @@
   "name": "Nowsze Horyzonty",
   "version": "0.1.0",
   "description": "Adds ratings, trailer links, genres, and short Polish summaries to the Nowe Horyzonty calendar.",
-  "permissions": ["storage"],
-  "host_permissions": ["https://www.nowehoryzonty.pl/*"],
   "content_scripts": [
     {
       "matches": ["https://www.nowehoryzonty.pl/program/kalendarz*"],

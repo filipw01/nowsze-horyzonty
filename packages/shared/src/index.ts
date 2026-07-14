@@ -4,17 +4,11 @@ export type RatingTone = "good" | "mixed" | "poor";
 
 export const PRE_MOVIE_CLIPS_MINUTES = 10;
 
-export interface FilmBatchRequest {
-  keys: NhFilmKey[];
-  debug?: boolean;
-}
-
 export interface FilmEnrichment {
   nhKey: NhFilmKey;
   festivalTitle: string;
   originalTitle?: string;
   imdbUrl?: string;
-  metacriticUrl?: string;
   trailerUrl?: string;
   genre?: string;
   summaryPl?: string;
@@ -28,13 +22,6 @@ export interface FilmEnrichment {
     reviewCount?: number;
     updatedAt?: string;
   };
-}
-
-export interface FilmBatchResponse {
-  items: Record<NhFilmKey, FilmEnrichment>;
-  updatedAt: string;
-  stale?: boolean;
-  errors?: Record<NhFilmKey, string>;
 }
 
 export function normalizeNhKey(input: string): NhFilmKey | null {

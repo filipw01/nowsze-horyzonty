@@ -9,5 +9,9 @@ codedb.snapshot
 *.sqlite-wal
 data/*.draft.json
 data/*.discovered.json
+# Reproducible catalog intermediates; data/films.json is the tracked catalog.
+data/*.generated.json
+data/*report.json
+.codex/
 coverage/
 .DS_Store
