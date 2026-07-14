@@ -54,11 +54,10 @@ function projectCatalogRecord(record, index) {
   const projected = {
     active: record.active,
     nhKey: requireString(record, "nhKey", index),
-    festivalTitle: requireString(record, "festivalTitle", index),
-    summaryPl: requireString(record, "summaryPl", index)
+    festivalTitle: requireString(record, "festivalTitle", index)
   };
 
-  for (const field of ["originalTitle", "imdbUrl", "genre"]) {
+  for (const field of ["originalTitle", "imdbUrl", "summaryPl", "genre"]) {
     copyOptionalString(record, projected, field);
   }
 

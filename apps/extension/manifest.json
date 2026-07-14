@@ -2,7 +2,13 @@
   "manifest_version": 3,
   "name": "Nowsze Horyzonty",
   "version": "0.1.0",
-  "description": "Adds ratings, trailer links, genres, and short Polish summaries to the Nowe Horyzonty calendar.",
+  "description": "Uzupełnia kalendarz Nowych Horyzontów o oceny IMDb, gatunki, zwiastuny, liczbę metek, godziny zakończenia seansów i krótkie opisy filmów po polsku.",
+  "author": "Filip Wachowiak",
+  "homepage_url": "https://github.com/filipw01/nowsze-horyzonty",
+  "developer": {
+    "name": "Filip Wachowiak",
+    "url": "https://github.com/filipw01"
+  },
   "content_scripts": [
     {
       "matches": ["https://www.nowehoryzonty.pl/program/kalendarz*"],
@@ -13,7 +19,10 @@
   ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "nowsze-horyzonty@local"
+      "id": "nowsze-horyzonty@filipw01.github.io",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   }
 }

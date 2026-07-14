@@ -1,0 +1,19 @@
+{
+  "summary": {
+    "pl": "Wzbogaca kalendarz Nowych Horyzontów o oceny, gatunki, zwiastuny, metki i opisy filmów."
+  },
+  "description": {
+    "pl": "Nowsze Horyzonty to niezależne rozszerzenie do kalendarza festiwalu Nowe Horyzonty.\n\nDodaje do programu oceny IMDb, gatunki, linki do zwiastunów, liczbę metek, godziny zakończenia seansów oraz krótkie opisy filmów po polsku.\n\nRozszerzenie działa wyłącznie na stronie kalendarza festiwalu i nie gromadzi ani nie przesyła danych użytkownika."
+  },
+  "categories": ["other"],
+  "homepage": {
+    "pl": "https://github.com/filipw01/nowsze-horyzonty"
+  },
+  "support_url": {
+    "pl": "https://github.com/filipw01/nowsze-horyzonty/issues"
+  },
+  "requires_payment": false,
+  "version": {
+    "license": "all-rights-reserved"
+  }
+}

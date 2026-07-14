@@ -64,6 +64,12 @@ describe("catalog projection", () => {
     expect(projected.trailerUrl).toBe("https://www.youtube.com/watch?v=fallback");
   });
 
+  it("omits an empty summary", () => {
+    const [projected] = projectCatalog([{ ...sourceFilm, summaryPl: "" }]);
+
+    expect(projected).not.toHaveProperty("summaryPl");
+  });
+
   it("does not skip an empty first candidate", () => {
     const [projected] = projectCatalog([
       { ...sourceFilm, trailerUrlOverride: undefined, trailerCandidates: ["", "https://www.youtube.com/watch?v=second"] }
