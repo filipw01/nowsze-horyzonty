@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-extension.mjs",
-    "package": "npm run build && node scripts/package-extension.mjs",
+    "package": "npm run build && node scripts/package-extension.mjs && node scripts/package-source.mjs",
+    "package:source": "node scripts/package-source.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests"
   },

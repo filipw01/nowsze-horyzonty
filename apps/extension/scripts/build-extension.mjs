@@ -38,6 +38,7 @@ await esbuild.build({
 });
 
 cpSync(resolve(root, "src/content.css"), resolve(dist, "content.css"));
+cpSync(resolve(root, "assets/nh-plus-128.png"), resolve(dist, "nh-plus-128.png"));
 cpSync(resolve(root, "manifest.json"), resolve(dist, "manifest.json"));
 
 console.log(`Built extension with ${embeddedFilmCatalog.length} catalog records`);

@@ -14,7 +14,7 @@
     "test:catalog": "tsx --test scripts/catalog/*.test.ts",
     "dead-code": "knip",
     "build:extension": "npm run build -w @nowsze-horyzonty/extension",
-    "package:extension": "npm run package -w @nowsze-horyzonty/extension",
+    "package:extension": "npm run build -w @nowsze-horyzonty/shared && npm run package -w @nowsze-horyzonty/extension",
     "nh:discover": "tsx scripts/discover-nh-films.ts",
     "nh:draft": "tsx scripts/draft-film-metadata.ts",
     "nh:match-imdb": "tsx scripts/match-imdb.ts",

@@ -2,9 +2,12 @@
   "manifest_version": 3,
   "name": "Nowsze Horyzonty",
   "version": "0.1.0",
-  "description": "Uzupełnia kalendarz Nowych Horyzontów o oceny IMDb, gatunki, zwiastuny, liczbę metek, godziny zakończenia seansów i krótkie opisy filmów po polsku.",
+  "description": "Dodaje do kalendarza Nowych Horyzontów oceny IMDb, gatunki, zwiastuny, liczbę metek, godziny zakończenia i opisy filmów.",
   "author": "Filip Wachowiak",
   "homepage_url": "https://github.com/filipw01/nowsze-horyzonty",
+  "icons": {
+    "128": "nh-plus-128.png"
+  },
   "developer": {
     "name": "Filip Wachowiak",
     "url": "https://github.com/filipw01"
