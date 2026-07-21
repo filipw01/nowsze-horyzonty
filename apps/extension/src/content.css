@@ -125,3 +125,16 @@ a.metka.nhx-metka-enhanced {
   margin-bottom: 8px;
   color: #e6e6e6;
 }
+
+@media (max-width: 700px) {
+  .nhx-grid-rating {
+    top: 7px;
+    bottom: auto;
+  }
+}
+
+@media (max-width: 840px) {
+  .nhx-grid-metkas {
+    left: calc(50% + 4px);
+  }
+}
