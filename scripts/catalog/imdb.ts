@@ -91,6 +91,19 @@ export async function readImdbDatasetRecords(imdbIds: Set<string>): Promise<Map<
   return records;
 }
 
+export async function readImdbTitleYears(imdbIds: Set<string>): Promise<Map<string, number>> {
+  const years = new Map<string, number>();
+  if (!imdbIds.size) return years;
+
+  console.log(`Reading IMDb basics dataset for ${imdbIds.size} title years`);
+  await scanImdbDataset(IMDB_BASICS_DATASET_URL, imdbIds, (id, columns, header) => {
+    const year = parseInteger(readTsvValue(columns, header, "startYear"));
+    if (year !== undefined) years.set(id, year);
+  });
+
+  return years;
+}
+
 async function imdbSuggestions(query: string): Promise<ImdbCandidate[]> {
   const path = imdbSuggestionPath(query);
   const url = `https://v2.sg.media-imdb.com/suggestion/${path[0]?.toLowerCase() || "x"}/${path}.json`;

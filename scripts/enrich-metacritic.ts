@@ -1,8 +1,11 @@
 import { patchMetacriticRecord, readCatalog, writeJson } from "./catalog/catalog.js";
+import { readImdbTitleYears } from "./catalog/imdb.js";
 import { findMetacriticMatch } from "./catalog/metacritic.js";
 import type { MatchFilm } from "./catalog/types.js";
 
 const catalog = await readCatalog();
+const imdbIds = new Set(catalog.flatMap((record) => (record.imdbId ? [record.imdbId] : [])));
+const titleYears = await readImdbTitleYears(imdbIds);
 const updated = [];
 const unresolved: string[] = [];
 const failures: string[] = [];
@@ -15,6 +18,8 @@ for (const [index, record] of catalog.entries()) {
     director: ""
   };
   if (record.originalTitle) film.originalTitle = record.originalTitle;
+  const year = record.imdbId ? titleYears.get(record.imdbId) : undefined;
+  if (year !== undefined) film.year = year;
 
   try {
     const match = await findMetacriticMatch(film);

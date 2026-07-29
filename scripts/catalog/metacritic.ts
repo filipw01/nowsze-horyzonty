@@ -24,7 +24,7 @@ export async function findMetacriticMatch(film: MatchFilm): Promise<MetacriticMa
   };
 }
 
-function scoreMetacriticCandidate(
+export function scoreMetacriticCandidate(
   film: MatchFilm,
   candidate: Omit<MetacriticCandidate, "query" | "confidence">,
   query: string
@@ -40,6 +40,7 @@ function scoreMetacriticCandidate(
   if (candidate.year && film.year && candidate.year === film.year) confidence += 22;
   if (candidate.year && film.year && Math.abs(candidate.year - film.year) === 1) confidence += 8;
   if (candidate.year && film.year && Math.abs(candidate.year - film.year) > 1) confidence -= 25;
+  if (!candidate.year && film.year) confidence -= 25;
   if (candidate.metascore !== undefined) confidence += 10;
   if (/\b(director s cut|remaster|remastered|restored|collection)\b/.test(title) && !aliases.includes(title)) confidence -= 20;
 
@@ -131,6 +132,6 @@ function absoluteMetacriticUrl(path: string): string {
   return new URL(path, METACRITIC_BASE_URL).href;
 }
 
-function parseMetascore(value: number | null | undefined): number | undefined {
-  return typeof value === "number" && value >= 0 && value <= 100 ? value : undefined;
+export function parseMetascore(value: number | null | undefined): number | undefined {
+  return typeof value === "number" && value > 0 && value <= 100 ? value : undefined;
 }

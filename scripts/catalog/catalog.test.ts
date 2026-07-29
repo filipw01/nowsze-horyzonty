@@ -4,7 +4,15 @@ import test from "node:test";
 import { patchImdbRecord, patchMetacriticRecord } from "./catalog.js";
 import { extractImdbDescription, extractImdbGraphqlDescription } from "./imdb.js";
 import { isAcceptableImdbMatch, savedImdbCandidate, scoreImdbCandidate, selectImdbMatch } from "./imdb-matching.js";
-import type { CatalogRecord, ImdbCandidate, ImdbTitleFacts, MatchFilm, MetacriticMatch } from "./types.js";
+import { parseMetascore, scoreMetacriticCandidate } from "./metacritic.js";
+import type {
+  CatalogRecord,
+  ImdbCandidate,
+  ImdbTitleFacts,
+  MatchFilm,
+  MetacriticCandidate,
+  MetacriticMatch
+} from "./types.js";
 
 const film: MatchFilm = {
   nhKey: "/program/26/example-film",
@@ -151,4 +159,20 @@ test("IMDb GraphQL description extraction accepts the title plot payload", () =>
     extractImdbGraphqlDescription({ data: { title: { plot: { plotText: { plainText: "  IMDb plot text.  " } } } } }),
     "IMDb plot text."
   );
+});
+
+test("Metacritic matching rejects placeholder scores and candidates from the wrong year", () => {
+  const candidate: Omit<MetacriticCandidate, "query" | "confidence"> = {
+    title: "Example Film",
+    slug: "example-film",
+    year: 1994,
+    metascore: 61
+  };
+  const { year: _year, ...candidateWithoutYear } = candidate;
+
+  assert.ok(scoreMetacriticCandidate(film, candidate, "Example Film").confidence < 70);
+  assert.ok(scoreMetacriticCandidate(film, { ...candidate, year: 2026 }, "Example Film").confidence >= 70);
+  assert.ok(scoreMetacriticCandidate(film, candidateWithoutYear, "Example Film").confidence < 70);
+  assert.equal(parseMetascore(0), undefined);
+  assert.equal(parseMetascore(61), 61);
 });
